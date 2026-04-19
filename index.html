@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cmatrix-win</title>
+  <meta name="google-site-verification" content="KiCRN98o-Hm3s4-OnTJ3Jnk_96YSHFduXROvk8dOFCk" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:       #00ff41;
+      --green-dim:   #00b32c;
+      --green-dark:  #003b10;
+      --bg:          #0d0d0d;
+      --surface:     #111;
+      --border:      #1a3a1a;
+      --text:        #c8ffc8;
+      --text-muted:  #5a9a5a;
+      --font-mono:   'Cascadia Code', 'Consolas', 'Courier New', monospace;
+      --font-sans:   'Segoe UI', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── hero ── */
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: 80px 24px 64px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    canvas#rain {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    header .inner { position: relative; z-index: 1; }
+
+    h1 {
+      font-family: var(--font-mono);
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      color: var(--green);
+      text-shadow: 0 0 20px #00ff4188;
+      letter-spacing: 0.04em;
+    }
+
+    header p {
+      margin-top: 12px;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin-inline: auto;
+    }
+
+    .badges {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border: 1px solid var(--green-dim);
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--green-dim);
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+    }
+    .badge:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── download button ── */
+    .cta {
+      margin-top: 36px;
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: filter .2s, transform .15s;
+    }
+    .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+    }
+    .btn-secondary {
+      border: 1px solid var(--green-dim);
+      color: var(--green);
+      background: transparent;
+    }
+
+    /* ── screenshot ── */
+    .screenshot-wrap {
+      max-width: 860px;
+      margin: 56px auto 0;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .screenshot-wrap img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 40px #00ff4118;
+      display: block;
+    }
+
+    /* ── main content ── */
+    main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 64px 24px 80px;
+    }
+
+    section { margin-bottom: 56px; }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      color: var(--green);
+      border-left: 3px solid var(--green);
+      padding-left: 14px;
+      margin-bottom: 20px;
+    }
+
+    p { color: var(--text); margin-bottom: 12px; }
+
+    a { color: var(--green-dim); text-decoration: none; }
+    a:hover { color: var(--green); text-decoration: underline; }
+
+    /* ── options table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 8px 14px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #0f1f0f; }
+
+    td:first-child {
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    /* ── code blocks ── */
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--green);
+      line-height: 1.6;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      color: var(--green-dim);
+      background: #0f1f0f;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+
+    /* ── note box ── */
+    .note {
+      border: 1px solid #3a3000;
+      background: #1a1600;
+      border-radius: 6px;
+      padding: 14px 18px;
+      color: #d4c060;
+      font-size: 0.9rem;
+      margin-top: 20px;
+    }
+
+    .note strong { color: #f0dc80; }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="rain"></canvas>
+
+<header>
+  <div class="inner">
+    <h1>cmatrix-win</h1>
+    <p>Matrix digital rain for the Windows terminal, written in C. Lightweight, fast, no dependencies.</p>
+
+    <div class="badges">
+      <span class="badge">Windows 10+</span>
+      <span class="badge">C</span>
+      <span class="badge">ANSI / VT100</span>
+      <span class="badge">UTF-8 katakana</span>
+      <span class="badge">open source</span>
+    </div>
+
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/rdelia/cmatrix-win/releases/latest/download/cmatrix.exe">
+        &#8659; Download .exe
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/rdelia/cmatrix-win">
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="screenshot-wrap">
+  <img src="screenshot.png" alt="cmatrix-win running in Windows Terminal" />
+</div>
+
+<main>
+
+  <section id="usage">
+    <h2>Usage</h2>
+    <pre><code>cmatrix [-b] [-B] [-c] [-r] [-s speed]</code></pre>
+    <table>
+      <thead>
+        <tr><th>Option</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>-b</td><td>Bold characters</td></tr>
+        <tr><td>-B</td><td>All bold (overrides -b)</td></tr>
+        <tr><td>-c</td><td>Katakana characters (needs UTF-8 font)</td></tr>
+        <tr><td>-r</td><td>Rainbow colors</td></tr>
+        <tr><td>-s 1–9</td><td>Speed — 1 = slow, 9 = fast (default 5)</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px; color: var(--text-muted); font-size:0.9rem;">Press any key to exit.</p>
+  </section>
+
+  <section id="requirements">
+    <h2>Requirements</h2>
+    <p>Windows 10 or later (requires ANSI/VT terminal support).</p>
+    <p>A terminal with a monospace font — <a href="https://aka.ms/terminal">Windows Terminal</a> is recommended.</p>
+    <p>For <code>-c</code> (katakana): a font that includes half-width katakana, such as MS Gothic or Cascadia Code.</p>
+  </section>
+
+  <section id="running">
+    <h2>Running the downloaded .exe</h2>
+    <p>Windows may show a <strong>"Windows protected your PC"</strong> SmartScreen warning on first launch. This happens because the executable is not commercially code-signed.</p>
+    <p>To run it anyway: click <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
+    <p>The app is fully open source — you can review the source and build it yourself if you prefer.</p>
+  </section>
+
+  <section id="building">
+    <h2>Building from source</h2>
+    <p>Requires MinGW (gcc) or MSVC.</p>
+    <pre><code>build.bat</code></pre>
+    <p>Or manually with MinGW:</p>
+    <pre><code>gcc -O2 -static -o cmatrix.exe cmatrix.c</code></pre>
+    <div class="note">
+      <strong>Note:</strong> Make sure <code>C:\MinGW\bin</code> is in your PATH before running gcc.
+    </div>
+  </section>
+
+  <section id="credits">
+    <h2>Credits</h2>
+    <p>Inspired by the original Linux <a href="https://github.com/abishekvashok/cmatrix">cmatrix</a> by Abishek Vashok.</p>
+  </section>
+
+</main>
+
+<footer>
+  <a href="https://github.com/rdelia/cmatrix-win">github.com/rdelia/cmatrix-win</a>
+</footer>
+
+<script>
+  /* mini rain animation on the hero canvas */
+  (function () {
+    const canvas = document.getElementById('rain');
+    const ctx    = canvas.getContext('2d');
+    const FONT   = 14;
+    const POOL   = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=<>:;!?|/\\{}[]~^';
+
+    let cols, drops;
+
+    function resize() {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      cols  = Math.floor(canvas.width / FONT);
+      drops = Array.from({ length: cols }, () => Math.random() * -50 | 0);
+    }
+
+    function draw() {
+      ctx.fillStyle = 'rgba(13,13,13,0.18)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = FONT + 'px monospace';
+
+      for (let i = 0; i < cols; i++) {
+        const ch = POOL[Math.random() * POOL.length | 0];
+        const x  = i * FONT;
+        const y  = drops[i] * FONT;
+
+        ctx.fillStyle = '#00ff41';
+        ctx.fillText(ch, x, y);
+
+        if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    setInterval(draw, 50);
+  })();
+</script>
+
+</body>
+</html>
